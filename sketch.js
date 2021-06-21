@@ -9,12 +9,12 @@ var man,wall,ground,spawn,startLine,water;
 var boulder, hurdle, bird,shark,coral,fish,oxygenBubbles;
 var boulderGRP, hurdleGRP,birdGRP,sharkGRP,coralGRP,fishGRP,oxyGRP;
 var lvlButtons;
-var timer1 = 30, timer2 = 45,timer3 = 50;
+var timer1 = 30, timer2 = 45,timer3 = 70;
 var heart1,heart2,heart3,heartTrigger = 11;
 var bubble1,bubble2,bubble3,bubbleLives = 14;
 
 var gameOverImg,winImg;
-var heartImg,bubbleImg,boulderImg,groundImg,skyBGImg,fish1Image,fish2Image,fish3Image,wallImg,sharkImg,oxyImg,cloudImg;
+var heartImg,bubbleImg,boulderImg,groundImg,skyBGImg,fish1Image,fish2Image,fish3Image,wallImg,sharkImg,oxyImg,cloudImg,birdImg1,birdImg2;
 var standingImg,runningImg,jumpingImg,swimmingImg,climbImg;
 
 
@@ -33,6 +33,8 @@ function preload(){
     sharkImg = loadImage("images/sharkImage.png")
     oxyImg = loadImage("images/oxyImage.png")
     cloudImg = loadImage("images/cloudImage.png")
+    birdImg1 = loadAnimation("images/birdImage.png")
+    birdImg2 = loadAnimation("images/birdImage2.png")
 
     standingImg = loadAnimation("images/standingStickmanImage.png")
     runningImg = loadAnimation("images/runningStickman.png")
@@ -72,7 +74,7 @@ function setup(){
 
     wall = createSprite(displayWidth/2+380,displayHeight/2-95,displayWidth/2,displayHeight/2+320)
     wall.shapeColor = 'grey'
-    wall.debug = true;
+    wall.debug = false;
     wall.addImage(wallImg)
     wall.scale = 1.5
     
@@ -87,7 +89,7 @@ function setup(){
     man = createSprite(spawn.x,spawn.y-75,20,115)
     man.shapeColor = "red"
     man.visible = false;
-    man.debug = true;
+    man.debug = false;
     man.addAnimation("standing",standingImg)
     man.scale = 0.7
     man.setCollider("rectangle",0,0,90,160)
@@ -116,17 +118,23 @@ function setup(){
     water.shapeColor =  "blue"
     water.visible = false;
 
-    bubble1 = createSprite(100,180,30,30)
+    bubble1 = createSprite(100,200,30,30)
     bubble1.shapeColor = "cyan"
     bubble1.visible = false;
+    bubble1.addImage(bubbleImg)
+    bubble1.scale = 0.2
 
-    bubble2 = createSprite(200,180,30,30)
+    bubble2 = createSprite(200,200,30,30)
     bubble2.shapeColor = "cyan"
     bubble2.visible = false;
+    bubble2.addImage(bubbleImg)
+    bubble2.scale = 0.2
 
-    bubble3 = createSprite(300,180,30,30)
+    bubble3 = createSprite(300,200,30,30)
     bubble3.shapeColor = "cyan"
     bubble3.visible = false;
+    bubble3.addImage(bubbleImg)
+    bubble3.scale = 0.2
     
     
 
@@ -180,23 +188,6 @@ function draw(){
         text("GAME OVER",displayWidth/2,displayHeight/2)
     }
 
-    if(keyDown("left")||keyDown("right")&&courseStatus !== 3&&plyStatus !== 1||plyStatus == 2){
-        man.changeAnimation("running")
-        man.scale = 0.3
-    }
-    else if(plyStatus == 3){
-        man.changeAnimation("swimming")
-        man.scale = 0.7
-    }
-    else if(plyStatus == 1){
-        man.changeAnimation("climbing")
-        man.scale = 0.3
-    }
-    else{
-        man.changeAnimation("standing")
-        man.scale = 0.7
-    }
-
     
     drawSprites();
 
@@ -228,6 +219,8 @@ function spawnInteractives(){
         boulder.shapeColor = "white"
         boulder.lifetime = 150
         boulder.depth = wall.depth +1;
+        boulder.addImage(boulderImg)
+        boulder.scale = 0.8
         boulderGRP.add(boulder)
     }
     if(plyStatus == 2&&frameCount % 40 == 0){
@@ -244,7 +237,8 @@ function spawnInteractives(){
         bird.shapeColor = "black"
         bird.velocityX = -12
         bird.lifetime = 130
-        birdGRP.add(bird)
+        bird.addAnimation("glide",birdImg1)
+        bird.scale = 0.2
     }
 
     if(plyStatus == 3&& frameCount % 300 == 0){
@@ -253,11 +247,25 @@ function spawnInteractives(){
         shark.shapeColor = "gray"
         shark.velocityX = -9
         shark.lifetime = 200
+        shark.addImage(sharkImg)
+        shark.scale = 0.3
         sharkGRP.add(shark);
     }
     if(plyStatus == 3&&frameCount % 40==0){
         var rand = Math.round(random(250,590))
+        
         fish = createSprite(displayWidth,rand,50,30)
+        var randImg = Math.round(random(1,3))
+        if(randImg == 1){
+            fish.addImage(fish1Image)
+        }
+        else if(randImg == 2){
+            fish.addImage(fish2Image)
+        }
+        else{
+            fish.addImage(fish3Image)
+        }
+        fish.scale = 0.15
         fish.shapeColor = "orange"
         fish.velocityX = -8
         fish.lifetime = 210
@@ -269,6 +277,8 @@ function spawnInteractives(){
         oxygenBubbles.shapeColor = "cyan"
         oxygenBubbles.velocityX = -12
         oxygenBubbles.lifetime = 120
+        oxygenBubbles.addImage(oxyImg)
+        oxygenBubbles.scale = 0.2
         oxyGRP.add(oxygenBubbles)
    }
 }
@@ -279,11 +289,27 @@ function playerStatus(){
         frameCount = 0;
         if(keyDown("left")||keyDown("right")){
             keyPressed();
+            man.changeAnimation("running")
+            man.scale = 0.3
+            man.setCollider("rectangle",65,0,215,275)
+        }
+        else{
+            man.changeAnimation("standing")
+            man.scale = 0.7
+            man.setCollider("rectangle",0,0,90,160)
         }
     }
     if(courseStatus == 2&& man.x <366){
         if(keyDown("right")){
             keyPressed();
+            man.changeAnimation("running")
+            man.scale = 0.3
+            man.setCollider("rectangle",65,0,215,275)
+        }
+        else{
+            man.changeAnimation("standing")
+            man.scale = 0.7
+            man.setCollider("rectangle",0,0,90,160)
         }
     }
     if(courseStatus == 2&&man.x <366){
@@ -303,6 +329,9 @@ function playerStatus(){
         man.y = man.y - 4
         if(keyDown("left")||keyDown("right")){
             keyPressed();
+            man.changeAnimation("climbing")
+            man.scale = 0.3
+            man.setCollider("rectangle",0,-50,245,395)
         }
 
         if(man.y < 400){
@@ -320,7 +349,7 @@ function playerStatus(){
         }
 
         if(man.x>605){
-            createBarrier(displayWidth/2+200,240,displayWidth/2,20,man,false)
+            createBarrier(displayWidth/2+200,270,displayWidth/2,20,man,false)
             createBarrier(displayWidth/2-175,displayHeight/2+30,25,445,man,false)
             createBarrier(displayWidth/2+575,displayHeight/2+30,25,445,man,false)
          }
@@ -329,6 +358,10 @@ function playerStatus(){
         
     }
     if(plyStatus == 2){
+        man.changeAnimation("running")
+        man.scale = 0.3
+        man.setCollider("rectangle",15,0,215,275)
+
         man.velocityY = +4
         startLine.x = startLine.x -4;
         createBarrier(366,displayHeight/2+30,20,300,man,false)
@@ -347,11 +380,14 @@ function playerStatus(){
         
     }
     if(plyStatus == 3){
+        man.changeAnimation("swimming")
+        man.scale = 0.6
+        man.setCollider("rectangle",0,0,175,100)
         man.velocityY = +3
         if(keyDown("up")||keyDown("down")){
             keyPressed();
         }
-        if(man.isTouching(oxyGRP)){
+        if(man.isTouching(oxyGRP)&&bubbleLives <= 11){
             bubbleLives = bubbleLives + 2.5
         }
         if(man.isTouching(fishGRP)){
@@ -448,7 +484,7 @@ function courseLevel(){
 
         textSize(25)
         fill("black")
-        text("Time left: "+timer3,200,110)
+        text("Time left: "+timer3,200,50)
         if(frameCount % 25 == 0&&timer3 > 0){
             timer3 = timer3 - 1
         }
